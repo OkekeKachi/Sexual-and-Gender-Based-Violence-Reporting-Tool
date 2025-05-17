@@ -13,7 +13,9 @@ Export functionality for reports in various formats (PDF, CSV, Excel)
 User authentication and role-based access control
 
 ## How to Run
-navigate to the client directory and run "npm run dev" for the frontend
+1. navigate to the client directory
+2. Install all dependecies by running "npm i"
+3. Run "npm run dev" to run the project
 
 ## Technology Stack
 
