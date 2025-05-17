@@ -12,9 +12,6 @@ Demographic analysis of reporters and victims
 Export functionality for reports in various formats (PDF, CSV, Excel)
 User authentication and role-based access control
 
-## HOW TO RUN
-navigate to the client directory and run "npm run dev" for the frontend
-
 ## Technology Stack
 
 Frontend: React.js, Material UI/Tailwind CSS, Chart.js/D3.js
@@ -66,7 +63,7 @@ SGBV/
 ```
 
 
-## Configuration
+Configuration
 The dashboard is designed to work with the existing backend structure. Update the API endpoint configurations in src/services/api.js to match the endpoints available in Dr. Julius's backend implementation.
 API Integration
 The dashboard connects to the following API endpoints:
@@ -77,7 +74,7 @@ GET /api/incidents/timeline - Get incident trends over time
 GET /api/incidents/location - Get geographical distribution
 GET /api/users/stats - Get user reporting statistics
 
-## Authentication
+Authentication
 The dashboard implements role-based access control:
 
 Admins: Full access to all dashboard features
@@ -95,13 +92,13 @@ bashdocker build -t gbv-dashboard .
 docker run -p 3000:3000 gbv-dashboard
 Contributing
 
-## Fork the repository
+Fork the repository
 Create your feature branch (git checkout -b feature/amazing-feature)
 Commit your changes (git commit -m 'Add some amazing feature')
 Push to the branch (git push origin feature/amazing-feature)
 Open a Pull Request
 
-## Maintenance
+Maintenance
 
 Regular dependency updates
 Database optimizations for performance
@@ -113,6 +110,9 @@ Common issues and their solutions:
 API Connection Issues: Verify backend server is running and credentials are correct
 Dashboard Not Loading: Check browser console for JavaScript errors
 Data Not Displaying: Verify database connection and API endpoints
+
+License
+
 
 Contact
 For technical support or inquiries, find out yourself
