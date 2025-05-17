@@ -12,7 +12,7 @@ Demographic analysis of reporters and victims
 Export functionality for reports in various formats (PDF, CSV, Excel)
 User authentication and role-based access control
 
-## HOW TO RUN
+## How to Run
 navigate to the client directory and run "npm run dev" for the frontend
 
 ## Technology Stack
@@ -107,7 +107,7 @@ Regular dependency updates
 Database optimizations for performance
 Security audits and patches
 
-Troubleshooting
+## Troubleshooting
 Common issues and their solutions:
 
 API Connection Issues: Verify backend server is running and credentials are correct
