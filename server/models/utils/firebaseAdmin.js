@@ -1,9 +1,13 @@
 const admin = require("firebase-admin");
 
-const serviceAccount = require("./safespeak-21f59-firebase-adminsdk-829uf-265fd69059.json"); // download from Firebase
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    }),
+  });
+}
 
 module.exports = admin;
