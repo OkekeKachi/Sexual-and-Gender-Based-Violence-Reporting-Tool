@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createReport } from "../api/report.api";
 import MapPicker from "../components/MapPicker";
-import LocationSearch from "../components/locationSearch";
+import LocationSearch from "../components/LocationSearch";
 import { getAddress } from "../utils/getAddress";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
