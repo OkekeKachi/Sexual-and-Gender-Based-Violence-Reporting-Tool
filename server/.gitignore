@@ -3,3 +3,4 @@ node_modules/
 serviceAccountKey.json
 # Firebase admin credentials
 safespeak-21f59-firebase-adminsdk-*.json
+models/utils/*.json
