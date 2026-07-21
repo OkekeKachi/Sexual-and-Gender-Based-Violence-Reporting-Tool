@@ -1,0 +1,82 @@
+/* components/AlertBanner.module.css */
+
+.banner {
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border-left: 4px solid transparent;
+}
+
+.banner.danger {
+  background: var(--red-50);
+  border-left-color: var(--red-500);
+  color: var(--red-700);
+}
+
+.banner.warning {
+  background: var(--amber-50);
+  border-left-color: var(--amber-500);
+  color: var(--amber-700);
+}
+
+.bannerHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.bannerTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.count {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.level {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.level.critical {
+  background: var(--red-500);
+  color: #fff;
+}
+
+.level.warning {
+  background: var(--amber-500);
+  color: #fff;
+}
+
+.itemText {
+  color: var(--gray-700);
+}
+
+.itemText strong {
+  font-weight: 600;
+  color: var(--gray-950);
+}

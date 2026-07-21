@@ -1,0 +1,53 @@
+/* ─── SafeGuard Design Tokens ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+
+:root {
+  /* Brand Blues */
+  --blue-950: #1B3A5C;
+  --blue-900: #0c447c;
+  --blue-700: #185fa5;
+  --blue-500: #378add;
+  --blue-300: #85b7eb;
+  --blue-100: #b5d4f4;
+  --blue-50: #e6f1fb;
+
+  /* Neutrals */
+  --gray-950: #1a1a1a;
+  --gray-700: #444441;
+  --gray-500: #888780;
+  --gray-300: #b4b2a9;
+  --gray-100: #d3d1c7;
+  --gray-50: #f0f2f5;
+
+  /* Semantic */
+  --red-700: #a32d2d;
+  --red-500: #e24b4a;
+  --red-50: #fcebeb;
+  --amber-700: #633806;
+  --amber-500: #ba7517;
+  --amber-50: #faeeda;
+  --green-700: #27500a;
+  --green-500: #639922;
+  --green-50: #eaf3de;
+
+  /* Surfaces */
+  --surface-page: #f0f2f5;
+  --surface-card: #ffffff;
+  --surface-sidebar: #012a53;
+
+--font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+--font-mono: 'JetBrains Mono', monospace;
+    /* everything else stays the same */
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
