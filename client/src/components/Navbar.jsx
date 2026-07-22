@@ -95,13 +95,65 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`md:hidden overflow-hidden transition-all duration-300 ${menuOpen ? 'max-h-64 mt-4' : 'max-h-0'}`}>
-        <div className="flex flex-col gap-2 pb-4">
-          {navLinks.map((link) => (
-            <Link key={link.name} to={link.path} onClick={() => setMenuOpen(false)} className="px-4 py-2 text-white/90 hover:bg-white/5 rounded-lg text-sm">
-              {link.name}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-[500px] mt-4" : "max-h-0"
+          }`}
+      >
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-3">
+          {/* Navigation Links */}
+          <div className="flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div className="my-3 border-t border-white/10" />
+
+          {/* Authentication */}
+          {user ? (
+            <div className="flex items-center justify-between rounded-xl bg-white/5 p-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2A9D8F] to-[#1B3A5C] text-sm font-bold text-white">
+                  {getInitials(user)}
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    {user.firstName || "User"}
+                  </p>
+                  <p className="text-xs text-white/60">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  logout();
+                  setMenuOpen(false);
+                }}
+                className="rounded-lg bg-gradient-to-r from-[#E76F51] to-[#D62828] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="block rounded-xl bg-gradient-to-r from-[#2A9D8F] to-[#1B3A5C] px-4 py-3 text-center text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Login
             </Link>
-          ))}
+          )}
         </div>
       </div>
     </nav>

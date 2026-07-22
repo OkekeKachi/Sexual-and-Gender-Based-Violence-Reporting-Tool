@@ -21,7 +21,14 @@ exports.signup = async (req, res) => {
   const { email, password, confirm_password, firstName, lastName, phone } = req.body;
 
   try {
-    if (!email || !password || !firstName || !lastName || !phone) {
+    if (
+      !email ||
+      !password ||
+      !confirm_password ||
+      !firstName ||
+      !lastName ||
+      !phone
+    ) {
       return res.status(400).json({
         success: false,
         message: "All fields are required"
@@ -36,15 +43,19 @@ exports.signup = async (req, res) => {
     }
 
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(userCredential.user, {
+      displayName: `${firstName} ${lastName}`
+    });
     const user = userCredential.user;
 
     await setDoc(doc(db, "users", user.uid), {
       firstName,
       lastName,
+      displayName: `${firstName} ${lastName}`,
       email,
       phone,
       role: "user",
-      createdAt: Date.now()
+      createdAt: serverTimestamp(),
     });
 
     return res.status(201).json({
