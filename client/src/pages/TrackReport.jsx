@@ -8,6 +8,9 @@ import {
 import { db } from "./firebase";
 import { playNotificationSound } from "../utils/playSound";
 import { getSingleReport } from "../api/report.api";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -301,7 +304,9 @@ function ChatPanel({ messages, messagesLoading, message, setMessage, onSend, rep
   }, {});
 
   return (
+    
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#F4F4F4" }}>
+       
       {/* Chat header */}
       <div style={{ padding: "18px 24px", background: "#fff", borderBottom: "0.5px solid #E2EAF0", display: "flex", alignItems: "center", gap: "12px" }}>
         <div style={{ width: "38px", height: "38px", background: "#EBF7F6", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -636,6 +641,8 @@ export default function TrackReport() {
           .chat-panel { height: 75vh; }
         }
       `}</style>
+
+      <Navbar />
       <div className="dashboard">
         <div className="case-panel">
           <CasePanel report={report} onReset={handleReset} isLinked={!!id} />
@@ -651,6 +658,7 @@ export default function TrackReport() {
           />
         </div>
       </div>
+      <Footer />
     </>
   );
 }

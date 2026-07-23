@@ -73,7 +73,7 @@ function Login() {
       } else if (user.role === "caseworker") {
         window.location.href = "/worker-dashboard";
       } else {
-        window.location.href = "/";
+        window.location.href = "/my-reports";
       }
 
     } catch (err) {

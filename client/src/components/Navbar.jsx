@@ -27,7 +27,7 @@ export default function Navbar() {
     { name: "About", path: "/about" },
     { name: "Report Incident", path: "/report" },
     { name: "Resources", path: "/resources" },
-    
+    {name:"Track", path:"/track"}
   ];
 
   const getInitials = (user) => {
@@ -64,12 +64,18 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
-          {user ? (
-
-            <Link to="/my-reports" className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === "/my-reports" ? "bg-[#2A9D8F] text-white" : "text-white/80 hover:bg-white/10"
-              }`}>My Reports</Link>
-            
-          ) : null}
+          {user && (
+            <Link
+              to="/my-reports"
+              onClick={() => setMenuOpen(false)}
+              className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${location.pathname === "/my-reports"
+                  ? "bg-[#2A9D8F] text-white"
+                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                }`}
+            >
+              My Reports
+            </Link>
+          )}
           <div className="ml-4 pl-4 border-l border-white/10">
             {user ? (
               <div className="flex items-center gap-3">
@@ -107,13 +113,28 @@ export default function Navbar() {
                 key={link.name}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white"
+                className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${location.pathname === link.path
+                    ? "bg-[#2A9D8F] text-white"
+                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                  }`}
               >
                 {link.name}
               </Link>
             ))}
-          </div>
 
+            {user && (
+              <Link
+                to="/my-reports"
+                onClick={() => setMenuOpen(false)}
+                className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${location.pathname === "/my-reports"
+                    ? "bg-[#2A9D8F] text-white"
+                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                  }`}
+              >
+                My Reports
+              </Link>
+            )}
+          </div>
           {/* Divider */}
           <div className="my-3 border-t border-white/10" />
 
@@ -126,9 +147,9 @@ export default function Navbar() {
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-white">
-                    {user.firstName || "User"}
-                  </p>
+                  {/* <p className="text-sm font-semibold text-white">
+                    {user.displayName || "User"}
+                  </p> */}
                   <p className="text-xs text-white/60">
                     {user.email}
                   </p>
