@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -44,6 +45,7 @@ function FadeIn({ children, delay = 0, className = "" }) {
 
 // ─── HERO SECTION ─────────────────────────────────────────────────────────────
 function HeroSection() {
+  const navigate = useNavigate();
   return (
     <section
       style={{
@@ -138,17 +140,45 @@ function HeroSection() {
             style={{ opacity: 0, animation: "fadeSlideUp 0.8s ease 0.8s forwards" }}
             className="flex flex-wrap gap-4"
           >
-            <CTAButton primary>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ marginRight: "8px" }}>
-                <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <CTAButton
+              primary
+              onClick={() => navigate("/reports")}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ marginRight: "8px" }}
+              >
+                <path
+                  d="M12 5v14M5 12h14"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
-              Report Incident
+              Report an incident
             </CTAButton>
-            <CTAButton>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ marginRight: "8px" }}>
-                <path d="M22 16.9c0 .3-.1.6-.2.9l-1.3 2.6c-.3.5-.8.8-1.4.8C10.3 21.2 2.8 13.7 2.8 4.9c0-.6.3-1.1.8-1.4L6.2 2.2c.3-.1.6-.2.9-.2.4 0 .8.2 1 .5l2 3.5c.3.4.2.9-.1 1.3l-1.4 1.4c1.1 2.2 2.9 4 5.1 5.1l1.4-1.4c.3-.3.9-.4 1.3-.1l3.5 2c.3.2.5.6.5 1z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+
+            <CTAButton
+              onClick={() => navigate("/resources")}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ marginRight: "8px" }}
+              >
+                <path
+                  d="M22 16.9c0 .3-.1.6-.2.9l-1.3 2.6c-.3.5-.8.8-1.4.8C10.3 21.2 2.8 13.7 2.8 4.9c0-.6.3-1.1.8-1.4L6.2 2.2c.3-.1.6-.2.9-.2.4 0 .8.2 1 .5l2 3.5c.3.4.2.9-.1 1.3l-1.4 1.4c1.1 2.2 2.9 4 5.1 5.1l1.4-1.4c.3-.3.9-.4 1.3-.1l3.5 2c.3.2.5.6.5 1z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
               </svg>
-              Get Help Now
+              Resources
             </CTAButton>
           </div>
 
@@ -1139,6 +1169,7 @@ function SectionLabel({ children }) {
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function App() {
+  
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
