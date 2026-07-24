@@ -142,7 +142,7 @@ function HeroSection() {
           >
             <CTAButton
               primary
-              onClick={() => navigate("/reports")}
+              onClick={() => navigate("/report")}
             >
               <svg
                 width="18"
