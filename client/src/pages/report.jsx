@@ -529,6 +529,12 @@ function ReportPage() {
           {/* 02 — Location */}
           <FormSection step="02" title="Location Details">
             <div className="space-y-4">
+              <p className="text-base text-[#64748B]">
+                Our map uses OpenStreetMap, so some buildings or newer locations may not
+                appear. If you can't find your exact location, select the nearest landmark
+                and provide additional details below.
+              </p>
+
               <LocationSearch onSelect={handleSearchSelect} />
 
               <input
@@ -538,9 +544,7 @@ function ReportPage() {
                 onChange={(e) => setManualLocation(e.target.value)}
               />
 
-              <p className="text-base text-[#64748B]">
-                Can't find your location? Type it above or drop a pin on the map.
-              </p>
+              
 
               <div className="h-[300px] rounded-2xl overflow-hidden border border-[#E2EEF8] shadow-inner">
                 <MapPicker onSelect={setMapLocation} externalPosition={mapLocation} />
@@ -569,7 +573,7 @@ function ReportPage() {
                   Click to upload evidence
                 </span>
                 <span className="text-base text-[#64748B] mt-1">
-                  Images, Videos or Audio (Max 10MB)
+                  Only image upload is available for now(Max 5MB)
                 </span>
                 <input
                   id="file-upload"
