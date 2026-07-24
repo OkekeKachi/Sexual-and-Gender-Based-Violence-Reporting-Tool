@@ -1,19 +1,24 @@
+const API_URL = import.meta.env.VITE_API_URL;
+
 export async function searchLocation(query) {
   if (!query) return [];
 
   try {
     const res = await fetch(
-      `http://localhost:3003/api/location/search?q=${query}`
+      `${API_URL}/location/search?q=${encodeURIComponent(query)}`
     );
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch locations");
+    }
 
     const data = await res.json();
 
-    console.log("SEARCH RESPONSE:", data); // 🔥 IMPORTANT DEBUG
+    console.log("SEARCH RESPONSE:", data);
 
     return data.data || [];
   } catch (err) {
-    console.log("Search failed:", err);
+    console.error("Search failed:", err);
     return [];
   }
 }
-
