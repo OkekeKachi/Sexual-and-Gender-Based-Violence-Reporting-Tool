@@ -5,8 +5,10 @@ import LocationSearch from "../components/LocationSearch";
 import { getAddress } from "../utils/getAddress";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+const API_URL = import.meta.env.VITE_API_URL;
 
-// ─── ANIMATION HOOK ───────────────────────────────────────────────────────────
+
+// ─── ANIMATION HOOK ─────────────────────────────────────────────   ──────────────
 function useInView(threshold = 0.1) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -151,39 +153,48 @@ function ReportPage() {
     return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
   }, [previewUrls]);
 
-  // ── Upload ──────────────────────────────────────────────────────────────────
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // ── Upload evidence ───────────────────────────────────────────────────────────
   const uploadFiles = async () => {
     if (!files.length) return [];
 
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
 
-    const res = await fetch("http://localhost:3003/api/upload/evidence", {
+    const res = await fetch(`${API_URL}/upload/evidence`, {
       method: "POST",
       body: formData,
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Upload failed");
+
+    if (!res.ok) {
+      throw new Error(data.message || "Upload failed");
+    }
 
     setUploadedEvidence(data.files);
     return data.files;
   };
 
-  // ── Cleanup uploaded files if submit fails ──────────────────────────────────
+  // ── Cleanup uploaded files if submit fails ────────────────────────────────────
   const cleanupUploads = async () => {
     if (!uploadedEvidence.length) return;
+
     try {
-      await fetch("http://localhost:3001/api/upload/evidence", {
+      await fetch(`${API_URL}/upload/evidence`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ public_ids: uploadedEvidence.map((f) => f.public_id) }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          public_ids: uploadedEvidence.map((file) => file.public_id),
+        }),
       });
     } catch (err) {
       console.error("Cleanup failed:", err);
     }
   };
-
   // ── Reverse-geocode map pin or fall back to manual input ───────────────────
   const buildLocation = async () => {
     if (!mapLocation) {
