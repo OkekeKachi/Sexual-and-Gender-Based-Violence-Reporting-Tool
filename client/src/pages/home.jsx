@@ -115,8 +115,8 @@ function HeroSection() {
               animation: "fadeSlideUp 0.8s ease 0.4s forwards",
             }}
           >
-            Report Safely.{" "}
-            <span style={{ color: "#2A9D8F" }}>Get Help</span> Quickly.
+            You Deserve to Be Heard.{" "}
+            <span style={{ color: "#2A9D8F" }}>Speak Up Safely </span>.
           </h1>
 
           <p
@@ -145,8 +145,8 @@ function HeroSection() {
               onClick={() => navigate("/report")}
             >
               <svg
-                width="18"
-                height="18"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 style={{ marginRight: "8px" }}
