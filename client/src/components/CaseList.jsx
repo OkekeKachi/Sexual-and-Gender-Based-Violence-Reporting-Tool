@@ -1,6 +1,7 @@
 // CaseList.jsx
 import { useEffect, useState } from "react";
 import { getQueueReports, getMyCases } from "../api/report.api";
+import AppLoader from "./AppLoader";
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 
@@ -122,17 +123,10 @@ export default function CaseList({ view, onSelect, selectedId }) {
 
         {/* Center Loading State */}
         {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[1px] z-10">
-            <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
-
-            <p className="text-sm font-medium text-slate-600">
-              Loading cases...
-            </p>
-
-            <p className="text-xs text-slate-400 mt-1">
-              Please wait a moment
-            </p>
-          </div>
+          <AppLoader
+            title="Loading case"
+            subtitle="Retrieving case information securely..."
+          />
         )}
 
         {/* Skeletons */}

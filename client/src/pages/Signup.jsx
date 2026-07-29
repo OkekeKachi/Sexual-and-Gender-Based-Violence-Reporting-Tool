@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Phone
 } from "lucide-react";
+import AppLoader from "../components/AppLoader";
 
 /* ─────────────────────────────────────────────
 Trust card (below form)
@@ -509,10 +510,10 @@ function Signup() {
                           className="btn-main relative flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white"
                         >
                           {loading ? (
-                            <>
-                              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                              <span className="ml-1 text-sm">Creating account…</span>
-                            </>
+                              <AppLoader
+                                title="Creating Account"
+                                subtitle="Please hold on..."
+                              />
                           ) : (
                             <>
                               Create Account

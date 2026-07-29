@@ -14,6 +14,7 @@ import {
   Heart,
   Sparkles,
 } from "lucide-react";
+import AppLoader from "../components/AppLoader";
 
 /* ─────────────────────────────────────────────
    Animated floating blob (pure CSS, no libs)
@@ -514,10 +515,10 @@ function StaffLogin() {
                   className="btn-main relative flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white"
                 >
                   {loading ? (
-                    <>
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      <span className="ml-1 text-sm">Verifying…</span>
-                    </>
+                    <AppLoader
+                      title="Signing you in"
+                      subtitle="Verifying your credentials..."
+                    />
                   ) : (
                     <>
                       Sign into Portal

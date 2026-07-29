@@ -37,9 +37,7 @@ exports.ensureAuthenticated = async (req, res, next) => {
       departmentId: userData.departmentId || null,
       isActive: userData.isActive ?? true
     };
-    console.log("USER:", req.user);
-    console.log("ROLE:", req.user?.role);
-    console.log("UID:", req.user?.uid);
+
 
     next();
 
@@ -182,6 +180,7 @@ exports.requireCaseAccess = async (req, res, next) => {
 
 
 exports.verifyMessageAccess = async (req, res, next) => {
+
   try {
     console.log("VERIFY:", req.user);
 

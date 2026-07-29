@@ -19,6 +19,7 @@ import WorkerDashboard from './pages/WorkerDashboard';
 import ChangePassword from './pages/ChangePassword'; 
 import StaffLogin from './pages/StaffLogin';
 import Signup from './pages/Signup'; 
+import AppLoader from './components/AppLoader';
 
 
 function App() {
@@ -26,9 +27,9 @@ function App() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        Loading...
-      </div>
+      <AppLoader
+        title="Loading"        
+      />
     );
   }
   return (

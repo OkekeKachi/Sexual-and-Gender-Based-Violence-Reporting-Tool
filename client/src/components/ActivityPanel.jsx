@@ -11,6 +11,7 @@ import {
   getDocs
 } from "firebase/firestore";
 import { db } from "../pages/firebase";
+import AppLoader from "./AppLoader";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -152,16 +153,20 @@ export default function ActivityPanel({ caseData }) {
     if (caseData?.status === "resolved") {
       return;
     }
-
+    console.log(caseData.caseId);
     if (!text.trim()) return;
 
     setLoading(true);
 
     try {
-      await sendMessage(caseData.caseId, text);
+      await sendMessage({
+        caseId: caseData.caseId,
+        message: text,
+      });
       setText("");
     } catch (err) {
       console.error(err);
+      
     } finally {
       setLoading(false);
     }
@@ -234,18 +239,10 @@ export default function ActivityPanel({ caseData }) {
           <>
               {/* Loading State */}
               {messagesLoading && (
-                <div className="flex flex-col items-center justify-center h-full text-center py-10 px-6">
-
-                  <div className="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-
-                  <p className="text-sm font-semibold text-slate-600">
-                    Loading messages...
-                  </p>
-
-                  <p className="text-xs text-slate-400 mt-1">
-                    Connecting to activity feed
-                  </p>
-                </div>
+                <AppLoader
+                  title="Loading Messages"
+                  subtitle="Connecting to activity feed..."
+                />
               )}
 
               {/* Empty State */}

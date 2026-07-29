@@ -539,11 +539,39 @@ function AdminDashboard() {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {loading ? (
-                                    <tr>
-                                        <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                                            Loading reports...
-                                        </td>
-                                    </tr>
+                                    <>
+                                        {[...Array(5)].map((_, i) => (
+                                            <tr key={i} className="animate-pulse border-b">
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-24 rounded bg-slate-200"></div>
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-40 rounded bg-slate-200"></div>
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-20 rounded bg-slate-200"></div>
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-24 rounded bg-slate-200"></div>
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-16 rounded bg-slate-200"></div>
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="h-8 w-24 rounded bg-slate-200"></div>
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="h-8 w-16 rounded bg-slate-200"></div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </>
                                 ) : filteredReports.length > 0 ? (
                                     filteredReports.slice(0, 10).map((report) => (
                                         <tr key={report.id} className="hover:bg-gray-50">

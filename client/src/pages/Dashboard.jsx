@@ -17,6 +17,7 @@ import CityBarChart from "../components/CityBarChart";
 import TypePieChart from "../components/TypePieChart";
 import PriorityChart from "../components/PriorityChart";
 import Map from "../components/Map";
+import AppLoader from "../components/AppLoader";
 
 export default function Dashboard() {
   
@@ -37,9 +38,10 @@ export default function Dashboard() {
   
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        Loading dashboard...
-      </div>
+      <AppLoader
+        title="Preparing dashboard"
+        subtitle="Loading assigned cases..."
+      />
     );
   }
   // ── Real-time reports ─────────────────────────────────────────────────────
