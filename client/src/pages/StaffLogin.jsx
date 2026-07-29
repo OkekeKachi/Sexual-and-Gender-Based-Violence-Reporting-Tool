@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { loginUser } from "../services/auth";
+import { useNavigate } from "react-router-dom";
 import {
   ShieldCheck,
   Lock,
@@ -148,6 +149,7 @@ function StaffLogin() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // staggered mount animation
@@ -165,21 +167,14 @@ function StaffLogin() {
     setLoading(true);
 
     try {
-      console.log("Before loginUser");
-      const res = await loginUser(form);
-      console.log("After loginUser");
-      console.log("LOGIN RESPONSE:", res);
-
-      const { token, user } = res;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      const user = await loginUser(form);
 
       if (user.role === "admin") {
-        window.location.href = "/dashboard";
+        navigate("/dashboard");
       } else if (user.role === "caseworker") {
-        window.location.href = "/worker-dashboard";
+        navigate("/worker-dashboard");
       } else {
-        window.location.href = "/";
+        navigate("/");
       }
     } catch (err) {
       console.error("LOGIN ERROR:", err);

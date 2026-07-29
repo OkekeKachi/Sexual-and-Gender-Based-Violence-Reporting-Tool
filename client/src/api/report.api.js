@@ -8,16 +8,7 @@ const auth = getAuth();
 
 
 
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // ✅ DEFINE TOKEN
-  
-  
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
 
-  return config;
-});
 
 // =========================
 // CREATE REPORT

@@ -1,9 +1,7 @@
 // pages/Dashboard.jsx
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { collection, query, orderBy, onSnapshot, limit } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-
+import { useAuth } from "../context/AuthContext";
 import { db } from "./firebase";
 import { getDashboardStats, updateReportStatus, updateReport, deleteReport } from "../api/report.api";
 
@@ -21,10 +19,10 @@ import PriorityChart from "../components/PriorityChart";
 import Map from "../components/Map";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  
   const prevReportsRef = useRef([]);
 
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user, loading } = useAuth();
   const [notification, setNotification] = useState(null);
   const [reports, setReports] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -36,22 +34,14 @@ export default function Dashboard() {
 
   const stats = analytics || { total: 0, pending: 0, reviewed: 0, resolved: 0, assigned: 0 };
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const auth = getAuth();
-    
-    
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user || null);
-      if (user) {
-        const token = await user.getIdTokenResult();
-        console.log("CLAIMS:", token.claims);
-      }
-    });
-    
-    return () => unsubscribe();
-  }, []);
-
+  
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading dashboard...
+      </div>
+    );
+  }
   // ── Real-time reports ─────────────────────────────────────────────────────
   useEffect(() => {
     const q = query(collection(db, "report"), orderBy("createdAt", "desc"), limit(10));
@@ -114,7 +104,7 @@ export default function Dashboard() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-screen overflow-hidden bg-white">
-      <Sidebar user={currentUser} />
+      <Sidebar/>
 
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Topbar

@@ -3,6 +3,10 @@ import { useState } from "react";
 import CaseList from "../components/CaseList";
 import CaseDetails from "../components/CaseDetails";
 import ActivityPanel from "../components/ActivityPanel";
+import { useAuth } from "../context/AuthContext";
+import { useLogout } from "../utils/useLogout";
+import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ShieldIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +37,9 @@ const navItems = [
 export default function WorkerDashboard() {
   const [selectedCase, setSelectedCase] = useState(null);
   const [view, setView] = useState("queue");
-
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const logout = useLogout();
   return (
     <>
       <style>{`
@@ -87,17 +93,36 @@ export default function WorkerDashboard() {
           </nav>
 
           {/* User Footer */}
-          <div className="px-4 py-3.5 border-t border-slate-800/70">
+          <div className="border-t border-slate-800/70 px-4 py-3.5">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 bg-slate-700 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-300 shrink-0">
-                CW
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[10px] font-bold text-slate-300">
+                {user?.displayName
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase() || "CW"}
               </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-slate-300 leading-none">Caseworker</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">Active session</p>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-slate-300">
+                  {user?.displayName || "Caseworker"}
+                </p>
+                <p className="truncate text-[10px] text-slate-500">
+                  {user?.email}
+                </p>
               </div>
-              <div className="ml-auto w-2 h-2 bg-emerald-400 rounded-full animate-pulse shrink-0" />
+
+              <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
+
+            <button
+              onClick={logout}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-300 transition-all hover:border-red-500 hover:bg-red-500/10 hover:text-red-400"
+              aria-label="Logout"
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
           </div>
         </aside>
 

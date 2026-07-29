@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
+import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/auth";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
+
 import {
   ShieldCheck,
   Lock,
@@ -43,39 +46,48 @@ function TrustCard({ icon, title, desc }) {
 /* ─────────────────────────────────────────────
    Main Login Component
 ───────────────────────────────────────────── */
+
 function Login() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { profile } = useAuth();
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
 
+  // Redirect once AuthContext has loaded the user's profile
+  useEffect(() => {
+    if (!profile) return;
+
+    if (profile.role === "admin") {
+      navigate("/dashboard", { replace: true });
+    } else if (profile.role === "caseworker") {
+      navigate("/worker-dashboard", { replace: true });
+    } else {
+      navigate("/my-reports", { replace: true });
+    }
+  }, [profile, navigate]);
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
     setLoading(true);
-    try {
-      const res = await loginUser(form);
-      const { token, user } = res;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      // Redirect based on user role
-      if (user.role === "admin") {
-        window.location.href = "/dashboard";
-      } else if (user.role === "caseworker") {
-        window.location.href = "/worker-dashboard";
-      } else {
-        window.location.href = "/my-reports";
-      }
 
+    try {
+      await loginUser(form);
+      // No navigation here.
+      // AuthContext will update `profile`,
+      // and the useEffect above will redirect.
     } catch (err) {
       setError(
         err.response?.data?.message ||

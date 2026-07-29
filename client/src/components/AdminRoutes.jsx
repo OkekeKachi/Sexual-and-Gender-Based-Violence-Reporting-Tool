@@ -1,38 +1,31 @@
 import { Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "../context/AuthContext";
 
 export default function AdminRoute({ children }) {
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const {
+    loading,
+    firebaseUser,
+    profile,
+  } = useAuth();
 
-  useEffect(() => {
-    const auth = getAuth();
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Checking access...
+      </div>
+    );
+  }
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
+  if (!firebaseUser) {
+    return <Navigate to="/login" replace />;
+  }
 
-      const token = await user.getIdTokenResult();
-
-      if (token.claims.role === "admin") {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (loading) return <p>Checking access...</p>;
-
-  if (!isAdmin) return <Navigate to="/login" />;
+  if (
+    profile?.role !== "admin" &&
+    profile?.role !== "superadmin"
+  ) {
+    return <Navigate to="/" replace />;
+  }
 
   return children;
 }

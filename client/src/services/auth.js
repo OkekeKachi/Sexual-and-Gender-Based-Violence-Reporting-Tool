@@ -23,40 +23,17 @@ import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
   
 // };
 
-export const loginUser = async (data) => {
-  // 1. Firebase login
-  console.log(data);
-  
-
-  console.log("Attempting Firebase login with:", data); // 👈 ADD THIS
-  const { email, password } = data;
-
+export const loginUser = async ({ email, password }) => {
   const auth = getAuth();
 
+  const credential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
 
-  const userCred = await signInWithEmailAndPassword(auth, email, password);
-
-  const token = await userCred.user.getIdToken();
-  localStorage.setItem("token", token);
-
-  await API.post("/users/login", data);
- 
-
-  // 2. Send token to backend
-  const res = await API.get("/worker/me", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-  console.log(res.data.user);
-  localStorage.setItem("user", JSON.stringify(res.data.user));
-  
-  return {
-    token,
-    user: res.data.user
-  };
-};
-
+  return credential.user;
+};  
 
 // SIGNUP
 // services/auth.js (or report.api.js — wherever you prefer)

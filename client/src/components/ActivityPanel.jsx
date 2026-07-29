@@ -75,6 +75,7 @@ export default function ActivityPanel({ caseData }) {
   const prevCountRef = useRef(0);
   const bottomRef = useRef(null);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const isResolved = caseData?.status === "resolved";
 
 
   useEffect(() => {
@@ -148,17 +149,24 @@ export default function ActivityPanel({ caseData }) {
 
   // ─── SEND MESSAGE (logic unchanged) ──────────────────────────────────────
   const handleSend = async () => {
+    if (caseData?.status === "resolved") {
+      return;
+    }
+
     if (!text.trim()) return;
+
     setLoading(true);
+
     try {
-      await sendMessage({ caseId: caseData.caseId, message: text });
+      await sendMessage(caseData.caseId, text);
       setText("");
     } catch (err) {
-      console.error("Send failed:", err);
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
+  
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -295,37 +303,56 @@ export default function ActivityPanel({ caseData }) {
       {/* Input Area */}
       {isClaimed && (
         <div className="border-t border-slate-200 p-3 bg-white shrink-0">
-          <div
-            className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl
-            px-3 py-2 transition-all duration-150
-            focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 focus-within:bg-white"
-          >
-            <input
-              type="text"
-              placeholder="Type a message…"
-              className="flex-1 bg-transparent text-sm text-slate-700 placeholder-slate-400
-              outline-none min-w-0"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <button
-              onClick={handleSend}
-              disabled={loading || !text.trim()}
-              className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0
-              transition-all duration-150
-              bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white
-              disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
-            >
-              {loading ? <SpinIcon /> : <SendIcon />}
-            </button>
-          </div>
-          <p className="text-[10px] text-slate-400 mt-1.5 px-1">
-            Press <kbd className="font-mono bg-slate-100 border border-slate-200 rounded px-1 py-0.5 text-[9px]">Enter</kbd> to send
-          </p>
+
+          {isResolved ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
+              <p className="text-sm font-semibold text-emerald-700">
+                This case has been resolved.
+              </p>
+              <p className="mt-1 text-xs text-emerald-600">
+                Messaging has been closed for this case.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div
+                className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl
+          px-3 py-2 transition-all duration-150
+          focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 focus-within:bg-white"
+              >
+                <input
+                  type="text"
+                  placeholder="Type a message…"
+                  className="flex-1 bg-transparent text-sm text-slate-700 placeholder-slate-400
+            outline-none min-w-0"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+
+                <button
+                  onClick={handleSend}
+                  disabled={loading || !text.trim()}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0
+            transition-all duration-150
+            bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white
+            disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+                >
+                  {loading ? <SpinIcon /> : <SendIcon />}
+                </button>
+              </div>
+
+              <p className="text-[10px] text-slate-400 mt-1.5 px-1">
+                Press{" "}
+                <kbd className="font-mono bg-slate-100 border border-slate-200 rounded px-1 py-0.5 text-[9px]">
+                  Enter
+                </kbd>{" "}
+                to send
+              </p>
+            </>
+          )}
         </div>
       )}
-
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Plus } from "lucide-react";
+import { Bell, Plus, LogOut } from "lucide-react";
+import { useLogout } from "../utils/useLogout";
 
 export default function Topbar({ title = "Dashboard", notificationCount = 0 }) {
   const navigate = useNavigate();
+  const logout = useLogout();
 
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
@@ -47,6 +49,16 @@ export default function Topbar({ title = "Dashboard", notificationCount = 0 }) {
           <Plus size={16} strokeWidth={3} />
           <span className="hidden sm:inline">Report Incident</span>
           <span className="sm:hidden">Report</span>
+        </button>
+        {/* Logout */}
+        <button
+          onClick={logout}
+          className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:bg-red-100 active:scale-95"
+          aria-label="Logout"
+          title="Logout"
+        >
+          <LogOut size={16} />
+          <span>Logout</span>
         </button>
       </div>
     </header>

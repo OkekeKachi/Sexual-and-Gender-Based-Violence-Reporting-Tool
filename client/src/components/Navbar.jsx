@@ -1,38 +1,53 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "../context/AuthContext";
 import { useLogout } from "../utils/useLogout";
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);  
   const location = useLocation();
   const logout = useLogout();
+  
+  
 
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => setUser(currentUser));
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
+  const {
+    firebaseUser,
+    profile,
+    loading,
+  } = useAuth();  
+  
+  
+  const fullName =
+    profile?.displayName ||
+    `${profile?.firstName || ""} ${profile?.lastName || ""}`.trim() ||
+    firebaseUser?.displayName ||
+    firebaseUser?.email;
+  
+  if (loading) {
+    return null;
+  }
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Report Incident", path: "/report" },
     { name: "Resources", path: "/resources" },
     {name:"Track", path:"/track"}
   ];
+  const userLinks = [
+    {
+      name: "My Reports",
+      path: "/my-reports"
+    }
+  ];
+  const isActive = (path) => location.pathname === path;
 
-  const getInitials = (user) => {
-    if (!user) return "";
-    if (user.displayName) return user.displayName.split(" ").map((n) => n[0]).join("").toUpperCase();
-    return user.email ? user.email.slice(0, 2).toUpperCase() : "U";
+  const getInitials = (name) => {
+    if (!name) return "U";
+
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
   return (
@@ -57,29 +72,31 @@ export default function Navbar() {
             <Link
               key={link.name}
               to={link.path}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === link.path ? "bg-[#2A9D8F] text-white" : "text-white/80 hover:bg-white/10"
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.path) ? "bg-[#2A9D8F] text-white" : "text-white/80 hover:bg-white/10"
                 }`}
             >
               {link.name}
             </Link>
           ))}
-          {user && (
-            <Link
-              to="/my-reports"
-              onClick={() => setMenuOpen(false)}
-              className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${location.pathname === "/my-reports"
-                  ? "bg-[#2A9D8F] text-white"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
-                }`}
-            >
-              My Reports
-            </Link>
-          )}
+          {firebaseUser &&
+            userLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setMenuOpen(false)}
+                className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive(link.path)
+                    ? "bg-[#2A9D8F] text-white"
+                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                  }`}
+              >
+                {link.name}
+              </Link>
+            ))}
           <div className="ml-4 pl-4 border-l border-white/10">
-            {user ? (
+            {firebaseUser ? (
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2A9D8F] to-[#1B3A5C] flex items-center justify-center text-xs font-semibold text-white">
-                  {getInitials(user)}
+                  {getInitials(fullName)}
                 </div>            
                 <div>
                   <button onClick={logout} className="px-3 py-1 rounded-lg text-sm font-medium bg-gradient-to-br from-[#E76F51] to-[#D62828] text-white">Logout</button>
@@ -112,7 +129,7 @@ export default function Navbar() {
                 key={link.name}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${location.pathname === link.path
+                className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive(link.path)
                     ? "bg-[#2A9D8F] text-white"
                     : "text-white/90 hover:bg-white/10 hover:text-white"
                   }`}
@@ -121,36 +138,39 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {user && (
-              <Link
-                to="/my-reports"
-                onClick={() => setMenuOpen(false)}
-                className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${location.pathname === "/my-reports"
-                    ? "bg-[#2A9D8F] text-white"
-                    : "text-white/90 hover:bg-white/10 hover:text-white"
-                  }`}
-              >
-                My Reports
-              </Link>
-            )}
+            {firebaseUser &&
+              userLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive(link.path)
+                      ? "bg-[#2A9D8F] text-white"
+                      : "text-white/90 hover:bg-white/10 hover:text-white"
+                    }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            
           </div>
           {/* Divider */}
           <div className="my-3 border-t border-white/10" />
 
           {/* Authentication */}
-          {user ? (
+          {firebaseUser ? (
             <div className="flex items-center justify-between rounded-xl bg-white/5 p-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2A9D8F] to-[#1B3A5C] text-sm font-bold text-white">
-                  {getInitials(user)}
+                  {getInitials(fullName)}
                 </div>
 
                 <div>
                   {/* <p className="text-sm font-semibold text-white">
-                    {user.displayName || "User"}
+                    {profile?.displayName || firebaseUser?.displayName}
                   </p> */}
-                  <p className="text-xs text-white/60">
-                    {user.email}
+                  <p className="text-xs text-white/60">                    
+                    {profile?.email || firebaseUser?.email}
                   </p>
                 </div>
               </div>

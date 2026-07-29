@@ -284,7 +284,7 @@ function CasePanel({ report, onReset, isLinked }) {
 }
 
 // ─── CHAT PANEL ───────────────────────────────────────────────────────────────
-function ChatPanel({ messages, messagesLoading, message, setMessage, onSend, report }) {
+function ChatPanel({ messages, messagesLoading, message, setMessage, onSend, report,isResolved }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -428,41 +428,129 @@ function ChatPanel({ messages, messagesLoading, message, setMessage, onSend, rep
       </div>
 
       {/* Input */}
-      <div style={{ padding: "14px 20px", background: "#fff", borderTop: "0.5px solid #E2EAF0" }}>
-        <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="Type a message… (Enter to send)"
-            rows={1}
+      <div
+        style={{
+          padding: "14px 20px",
+          background: "#fff",
+          borderTop: "0.5px solid #E2EAF0",
+        }}
+      >
+        {isResolved ? (
+          <div
             style={{
-              flex: 1, border: "0.5px solid #E2EAF0", borderRadius: "12px", padding: "12px 14px",
-              fontFamily: "'DM Sans', sans-serif", fontSize: "13.5px", color: "#0F2A45",
-              background: "#F8FAFC", outline: "none", resize: "none", lineHeight: 1.5,
-              maxHeight: "100px", overflow: "auto", transition: "border-color 0.2s",
+              background: "#ECFDF5",
+              border: "1px solid #A7F3D0",
+              borderRadius: "12px",
+              padding: "16px",
+              textAlign: "center",
             }}
-            onFocus={e => e.target.style.borderColor = "#2A9D8F"}
-            onBlur={e => e.target.style.borderColor = "#E2EAF0"}
-          />
-          <button
-            onClick={onSend}
-            disabled={!message.trim()}
-            style={{
-              width: "44px", height: "44px", background: message.trim() ? "#2A9D8F" : "#E2EAF0",
-              border: "none", borderRadius: "12px", cursor: message.trim() ? "pointer" : "not-allowed",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              transition: "all 0.2s", transform: "none",
-            }}
-            onMouseOver={e => message.trim() && (e.currentTarget.style.background = "#238a7e")}
-            onMouseOut={e => message.trim() && (e.currentTarget.style.background = "#2A9D8F")}
           >
-            <Ico d={ICONS.send} size={16} color={message.trim() ? "#fff" : "#94A3B8"} />
-          </button>
-        </div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "10.5px", color: "#94A3B8", margin: "8px 0 0", textAlign: "center" }}>
-          Messages are encrypted and visible only to you and your assigned caseworker.
-        </p>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 600,
+                fontSize: "14px",
+                color: "#047857",
+              }}
+            >
+              This case has been resolved.
+            </p>
+
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px",
+                color: "#065F46",
+                lineHeight: 1.5,
+              }}
+            >
+              Messaging has been closed for this case.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "flex-end",
+              }}
+            >
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKey}
+                placeholder="Type a message… (Enter to send)"
+                rows={1}
+                style={{
+                  flex: 1,
+                  border: "0.5px solid #E2EAF0",
+                  borderRadius: "12px",
+                  padding: "12px 14px",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "13.5px",
+                  color: "#0F2A45",
+                  background: "#F8FAFC",
+                  outline: "none",
+                  resize: "none",
+                  lineHeight: 1.5,
+                  maxHeight: "100px",
+                  overflow: "auto",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#2A9D8F")}
+                onBlur={(e) => (e.target.style.borderColor = "#E2EAF0")}
+              />
+
+              <button
+                onClick={onSend}
+                disabled={!message.trim()}
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  background: message.trim() ? "#2A9D8F" : "#E2EAF0",
+                  border: "none",
+                  borderRadius: "12px",
+                  cursor: message.trim() ? "pointer" : "not-allowed",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  transition: "all 0.2s",
+                }}
+                onMouseOver={(e) =>
+                  message.trim() &&
+                  (e.currentTarget.style.background = "#238a7e")
+                }
+                onMouseOut={(e) =>
+                  message.trim() &&
+                  (e.currentTarget.style.background = "#2A9D8F")
+                }
+              >
+                <Ico
+                  d={ICONS.send}
+                  size={16}
+                  color={message.trim() ? "#fff" : "#94A3B8"}
+                />
+              </button>
+            </div>
+
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "10.5px",
+                color: "#94A3B8",
+                margin: "8px 0 0",
+                textAlign: "center",
+              }}
+            >
+              Messages are encrypted and visible only to you and your assigned
+              caseworker.
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
@@ -480,6 +568,7 @@ export default function TrackReport() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [messagesLoading, setMessagesLoading] = useState(false);
+  
 
   useEffect(() => {
     if (!id) return;
@@ -512,7 +601,7 @@ export default function TrackReport() {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     if (!report) return;
 
@@ -585,12 +674,16 @@ export default function TrackReport() {
   }, [report]);
 
   const handleSend = async () => {
+    if (isResolved) return;
+
     if (!message.trim()) return;
+
     try {
       await sendMessage(
         { caseId: report.caseId, message },
         id ? null : sessionPin
       );
+
       setMessage("");
     } catch (err) {
       console.error(err);
@@ -609,7 +702,7 @@ export default function TrackReport() {
       setPin("");
     }
   };
-
+  const isResolved = report?.status === "resolved";
   if (loading) return <LoadingScreen />;
 
   if (!report && !id) {
@@ -655,6 +748,7 @@ export default function TrackReport() {
             setMessage={setMessage}
             onSend={handleSend}
             report={report}
+            isResolved={isResolved}
           />
         </div>
       </div>

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updatePasswordBackend } from "../api/report.api";
+import { useAuth } from "../context/AuthContext";
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  const { profile } = useAuth();
 
   const navigate = useNavigate();
 
@@ -26,14 +28,11 @@ export default function ChangePassword() {
 
       alert("Password updated successfully");
 
-      const userData = JSON.parse(localStorage.getItem("user"));
-
-      if (userData.role === "admin") {
-        navigate("/admin-dashboard");
+      if (profile?.role === "admin") {
+        navigate("/dashboard");
       } else {
         navigate("/worker-dashboard");
       }
-
     } catch (err) {
       console.error(err);
 

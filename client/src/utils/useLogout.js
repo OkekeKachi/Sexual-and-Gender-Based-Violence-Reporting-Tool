@@ -1,17 +1,14 @@
 import { getAuth, signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 export const useLogout = () => {
+  const navigate = useNavigate();
+
   const logout = async () => {
-    const auth = getAuth();
-
     try {
-      await signOut(auth);
+      await signOut(getAuth());
 
-      // optional cleanup (important for your app)
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      window.location.href = "/login"; // force reset state
+      navigate("/login", { replace: true });
     } catch (err) {
       console.error("Logout failed:", err);
     }

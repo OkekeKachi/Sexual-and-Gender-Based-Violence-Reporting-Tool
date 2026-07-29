@@ -7,12 +7,14 @@ const bcrypt = require("bcrypt");
 exports.ensureAuthenticated = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+    console.log(req.headers.authorization);
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       // 👉 No token = not logged in (but still allowed)
       req.user = null;
       return next();
     }
+    
 
     const token = authHeader.replace("Bearer ", "").trim();
 
@@ -44,6 +46,28 @@ exports.ensureAuthenticated = async (req, res, next) => {
     // ❗ don’t block — just treat as unauthenticated
     req.user = null;
     next();
+  }
+};
+exports.optionalAuth = async (req, res, next) => {
+  try {
+    const header = req.headers.authorization;
+
+    if (!header || !header.startsWith("Bearer ")) {
+      return next(); // anonymous user
+    }
+
+    const token = header.split(" ")[1];
+
+    const decoded = await admin.auth().verifyIdToken(token);
+
+    req.user = {
+      uid: decoded.uid,
+      email: decoded.email,
+    };
+
+    next();
+  } catch (err) {
+    next(); // invalid token → continue as anonymous
   }
 };
 

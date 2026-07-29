@@ -71,6 +71,7 @@ export default function CaseDetails({ caseData }) {
     setClaiming(true);
     try {
       await claimCase(caseData.id);
+      
     } catch (err) {
       console.error(err);
     } finally {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import AdminRoute from "./components/AdminRoutes";
 import './index.css'; // Make sure to import your CSS file with Tailwind directives
 import AdminDashboard from "./pages/adminDashboard";
@@ -21,6 +22,15 @@ import Signup from './pages/Signup';
 
 
 function App() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
   return (
     <>
       <BrowserRouter>

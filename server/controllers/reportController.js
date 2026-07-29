@@ -53,6 +53,7 @@ exports.createReport = async (req, res) => {
     witness,
     anonymous
   } = req.body;
+  console.log(req.body)
 
   try {
     if (typeof evidence === "string") {
@@ -111,7 +112,8 @@ exports.createReport = async (req, res) => {
     }
 
     // ================= AUTH =================
-    const user = req.session.user||req.user || null;
+    
+    const user = req.user || null;
     let reporter = null;
 
     if (!isAnonymous) {

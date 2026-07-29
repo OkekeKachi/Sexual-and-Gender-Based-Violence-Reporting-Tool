@@ -1,6 +1,8 @@
 // components/Sidebar.jsx
 import { icon } from "leaflet";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
 
 const NAV = [
   {
@@ -39,13 +41,15 @@ const NAV = [
 ];
 
 export default function Sidebar({ user }) {
+  
+  const { profile, firebaseUser } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const initials = user?.displayName
-    ? user.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-    : "AU";
-
+  const initials =
+    profile?.firstName && profile?.lastName
+      ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
+      : "AU";
   return (
     <aside className="w-[230px] min-w-[230px] bg-[var(--surface-sidebar)] flex flex-col h-screen sticky top-0">
 
@@ -95,14 +99,18 @@ export default function Sidebar({ user }) {
 
       {/* Footer */}
       <div className="px-5 py-3.5 border-t border-white/10 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-[14px] font-semibold text-white shrink-0">
+        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-[14px] font-semibold text-white shrink-0"> 
           {initials}
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[15px] font-medium text-white truncate">
-            {user?.displayName || "Admin User"}
+            {profile?.firstName && profile?.lastName
+              ? `${profile.firstName} ${profile.lastName}`
+              : "Admin User"}
           </div>
-          <div className="text-[13px] text-white/40">Administrator</div>
+          <div className="text-[13px] text-white/40">{profile?.role
+            ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1)
+            : "Administrator"}</div>
         </div>
       </div>
     </aside>

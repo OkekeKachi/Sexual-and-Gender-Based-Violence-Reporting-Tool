@@ -134,6 +134,13 @@ exports.getMyCases = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
     const uid = req.user.uid;
 
     const userRef = doc(db, "users", uid);
@@ -146,15 +153,14 @@ exports.getMe = async (req, res) => {
       });
     }
 
-    const userData = snap.data();
-
     return res.json({
       success: true,
-      user: userData
+      user: snap.data()
     });
 
   } catch (error) {
     console.error(error);
+
     res.status(500).json({
       success: false,
       message: "Failed to get user"
