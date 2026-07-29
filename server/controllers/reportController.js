@@ -221,6 +221,7 @@ exports.createReport = async (req, res) => {
 // ==============================
 exports.getUserReports = async (req, res) => {
   try {
+    console.log("CONTROLLER USER:", req.user);
     const userId = req.user.uid;
 
     const snapshot = await getDocs(collection(db, "report"));

@@ -14,7 +14,7 @@ exports.ensureAuthenticated = async (req, res, next) => {
       req.user = null;
       return next();
     }
-    
+
 
     const token = authHeader.replace("Bearer ", "").trim();
 
@@ -37,6 +37,9 @@ exports.ensureAuthenticated = async (req, res, next) => {
       departmentId: userData.departmentId || null,
       isActive: userData.isActive ?? true
     };
+    console.log("USER:", req.user);
+    console.log("ROLE:", req.user?.role);
+    console.log("UID:", req.user?.uid);
 
     next();
 
