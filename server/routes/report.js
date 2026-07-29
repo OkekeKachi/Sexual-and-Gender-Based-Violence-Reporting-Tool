@@ -7,7 +7,7 @@ const { ensureAuthenticated, ensureAdmin, optionalAuth } = require("../middlewar
 // REPORT ROUTES
 // router.post("/submit-report", ensureAuthenticated, submitReport);
 router.get("/view-reports", ensureAuthenticated,  getUserReports);
-router.post("/create-report", ensureAuthenticated, createReport);
+router.post("/create-report", optionalAuth, createReport);
 router.post("/track", trackReport);
 router.post("/resolve",ensureAuthenticated, resolveReport);
 
