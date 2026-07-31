@@ -1,7 +1,8 @@
 const { auth, db } = require("../models/firebase");
 const {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  updateProfile
 } = require("firebase/auth");
 
 const {
