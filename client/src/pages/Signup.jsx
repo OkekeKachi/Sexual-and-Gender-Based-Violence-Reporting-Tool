@@ -510,10 +510,7 @@ function Signup() {
                           className="btn-main relative flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white"
                         >
                           {loading ? (
-                              <AppLoader
-                                title="Creating Account"
-                                subtitle="Please hold on..."
-                              />
+                              <span>Creating account....</span>
                           ) : (
                             <>
                               Create Account
