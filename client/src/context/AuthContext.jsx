@@ -44,7 +44,11 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      await fetchProfile();
+      // Firebase auth is ready
+      setLoading(false);
+
+      // Fetch profile in the background
+      fetchProfile();
       
 
       setLoading(false);
