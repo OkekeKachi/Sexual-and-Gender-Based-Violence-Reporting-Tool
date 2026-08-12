@@ -1,6 +1,10 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../services/auth";
+import {
+  loginUser,
+  resendVerificationEmail,
+  checkEmailVerified,
+} from "../services/auth";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
@@ -56,23 +60,108 @@ function Login() {
   const [mounted, setMounted] = useState(false);
   const { profile } = useAuth();
 
+  // Only true right after THIS page successfully calls loginUser(). The
+  // redirect effect below requires this to be true, so an existing
+  // `profile` from a previous session (e.g. AdminRoute bouncing an
+  // unauthorized user back to /login while they're still authenticated
+  // elsewhere) can never trigger a redirect on its own.
+  const [loginSucceeded, setLoginSucceeded] = useState(false);
+
+  // ── Email verification notice state ──
+  const [verificationRequired, setVerificationRequired] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState("");
+  const [resendError, setResendError] = useState("");
+
+  // ── Verification polling state ──
+  // The email this verificationRequired episode is for. Captured once, at
+  // the moment loginUser() rejects for being unverified, rather than read
+  // live from `form.email` on every poll — the login form below stays on
+  // screen while this notice is up, so this keeps polling anchored to the
+  // account that actually failed even if the input changes.
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState("");
+  // True once GET /users/verification-status has reported emailVerified:
+  // true for pendingVerificationEmail. Switches the notice from
+  // "not verified yet" to "verified, continue" and stops polling.
+  const [emailVerifiedDetected, setEmailVerifiedDetected] = useState(false);
+
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
 
-  // Redirect once AuthContext has loaded the user's profile
+  // Resend cooldown ticker. Only depends on resendCooldown itself — counts
+  // down to 0 and then stops scheduling further ticks, so this can't loop.
   useEffect(() => {
-    if (!profile) return;
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
 
-    if (profile.role === "admin") {
-      navigate("/dashboard", { replace: true });
-    } else if (profile.role === "caseworker") {
-      navigate("/worker-dashboard", { replace: true });
-    } else {
-      navigate("/my-reports", { replace: true });
-    }
-  }, [profile, navigate]);
+  // Poll the backend for the real Firebase emailVerified value while the
+  // "not verified" notice is up. Does NOT touch auth.currentUser — that's
+  // null here because loginUser() already signed the user out.
+  //
+  // Starts only when verificationRequired is true and verification hasn't
+  // already been detected; stops (via the cleanup below) the moment either
+  // flag changes, so leaving this state, a fresh submit, or verification
+  // being detected all tear the interval down instead of layering another
+  // one on top. A single interval + a single timeout per active episode —
+  // never more.
+  useEffect(() => {
+    if (!verificationRequired || emailVerifiedDetected) return;
+
+    let cancelled = false;
+    const POLL_MS = 4000;
+    const MAX_DURATION_MS = 60000;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const verified = await checkEmailVerified(pendingVerificationEmail);
+        if (cancelled) return;
+        if (verified) {
+          setEmailVerifiedDetected(true);
+        }
+      } catch (err) {
+        // A transient network/backend hiccup shouldn't kill the whole
+        // waiting experience — just skip this tick and try again on the
+        // next one. Nothing is written to `error`/`verificationRequired`.
+        console.error("checkEmailVerified poll failed:", err);
+      }
+    }, POLL_MS);
+
+    // Safety cap: stop polling after 60s even if verification never lands,
+    // so a user who walks away doesn't leave an interval running forever.
+    const maxDurationId = setTimeout(() => {
+      cancelled = true;
+      clearInterval(intervalId);
+    }, MAX_DURATION_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+      clearTimeout(maxDurationId);
+    };
+  }, [verificationRequired, emailVerifiedDetected, pendingVerificationEmail]);
+
+  // Redirect only after a successful, verified login on THIS page — not
+  // merely because AuthContext already has a `profile` (see loginSucceeded
+  // above). This is what stops the AdminRoute navigation loop.
+  useEffect(() => {
+    if (!loginSucceeded || !profile) return;
+
+    const redirectPath =
+      profile.role === "admin" || profile.role === "superadmin"
+        ? "/dashboard"
+        : profile.role === "caseworker"
+          ? "/worker-dashboard"
+          : "/my-reports";
+
+    navigate(redirectPath, { replace: true });
+  }, [loginSucceeded, profile, navigate]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -81,22 +170,66 @@ function Login() {
     e.preventDefault();
 
     setError("");
+    setVerificationRequired(false);
+    setEmailVerifiedDetected(false);
+    setPendingVerificationEmail("");
+    setLoginSucceeded(false);
     setLoading(true);
 
     try {
       await loginUser(form);
-      // No navigation here.
-      // AuthContext will update `profile`,
-      // and the useEffect above will redirect.
+      // loginUser() already: authenticates with Firebase, reloads the
+      // user, and throws before this line if emailVerified is false (and
+      // signs them out). Reaching here means login genuinely succeeded —
+      // only now do we allow the redirect effect to act on `profile`.
+      setLoginSucceeded(true);
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        "We couldn't sign you in. Please double-check your details and try again."
-      );
+      const message = err.response?.data?.message || err.message;
+
+      if (message === "Please verify your email before logging in.") {
+        // Dedicated verification UI, not the generic error banner. Anchor
+        // polling to the email that just failed verification.
+        setVerificationRequired(true);
+        setPendingVerificationEmail(form.email);
+      } else {
+        setError(
+          message ||
+          "We couldn't sign you in. Please double-check your details and try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResend = async () => {
+    if (resendLoading || resendCooldown > 0) return;
+
+    setResendError("");
+    setResendMessage("");
+    setResendLoading(true);
+    try {
+      await resendVerificationEmail(form.email);
+      setResendMessage("Verification email sent! Check your inbox or spam folder.");
+      setResendCooldown(60);
+    } catch (err) {
+      setResendError(
+        err.response?.data?.message ||
+        err.message ||
+        "We couldn't resend the verification email. Please try again."
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  // Just dismisses the verification notice back to the normal login form.
+  // Does NOT authenticate anyone — the user still has to press Login,
+  // which runs the real loginUser() check.
+  const handleContinueToLogin = () => {
+    setVerificationRequired(false);
+    setEmailVerifiedDetected(false);
+    setPendingVerificationEmail("");
   };
 
   return (
@@ -300,8 +433,121 @@ function Login() {
                   </p>
                 </div>
 
+                {/* Email verification notice */}
+                {verificationRequired && !emailVerifiedDetected && (
+                  <div
+                    className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4"
+                    role="alert"
+                    aria-live="assertive"
+                    style={{ animation: "fadeSlideUp 0.3s ease both" }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Mail
+                        size={17}
+                        className="mt-0.5 shrink-0 text-amber-600"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-amber-800">
+                          Email not verified
+                        </p>
+                        <p className="mt-1 text-[13px] leading-relaxed text-amber-700">
+                          Your email address hasn't been verified yet. Check
+                          your inbox for the verification link.
+                        </p>
+
+                        <div className="mt-2.5 inline-flex max-w-full items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1.5">
+                          <Mail size={13} className="shrink-0 text-amber-600" />
+                          <span className="truncate text-[12px] font-semibold text-amber-800">
+                            {form.email}
+                          </span>
+                        </div>
+
+                        {resendError && (
+                          <div
+                            className="mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-[13px] font-medium text-red-700"
+                            role="alert"
+                            aria-live="assertive"
+                          >
+                            <AlertCircle
+                              size={14}
+                              className="mt-0.5 shrink-0 text-red-500"
+                            />
+                            <span>{resendError}</span>
+                          </div>
+                        )}
+
+                        {resendMessage && !resendError && (
+                          <div
+                            className="mt-3 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-[13px] font-medium text-emerald-700"
+                            role="status"
+                            aria-live="polite"
+                          >
+                            <ShieldCheck
+                              size={14}
+                              className="mt-0.5 shrink-0 text-emerald-500"
+                            />
+                            <span>{resendMessage}</span>
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={handleResend}
+                          disabled={resendLoading || resendCooldown > 0}
+                          aria-live="polite"
+                          className="btn-main mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-lg text-[13px] font-semibold text-white disabled:cursor-not-allowed sm:w-auto sm:px-5"
+                        >
+                          {resendLoading ? (
+                            <span>Sending...</span>
+                          ) : resendCooldown > 0 ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Clock size={13} />
+                              Resend available in {resendCooldown}s
+                            </span>
+                          ) : (
+                            <span>Resend verification email</span>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Email verified — polling detected it */}
+                {verificationRequired && emailVerifiedDetected && (
+                  <div
+                    className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4"
+                    role="status"
+                    aria-live="polite"
+                    style={{ animation: "fadeSlideUp 0.3s ease both" }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <ShieldCheck
+                        size={17}
+                        className="mt-0.5 shrink-0 text-emerald-600"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-emerald-800">
+                          Email verified successfully
+                        </p>
+                        <p className="mt-1 text-[13px] leading-relaxed text-emerald-700">
+                          You can now sign in.
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={handleContinueToLogin}
+                          className="btn-main mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-lg text-[13px] font-semibold text-white sm:w-auto sm:px-5"
+                        >
+                          Continue to Login
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Error banner */}
-                {error && (
+                {!verificationRequired && error && (
                   <div
                     className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700"
                     role="alert"

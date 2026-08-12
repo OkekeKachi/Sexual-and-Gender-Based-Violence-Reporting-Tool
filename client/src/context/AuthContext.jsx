@@ -24,12 +24,15 @@ export function AuthProvider({ children }) {
   const fetchProfile = async () => {
     try {
       const res = await API.get("/worker/me");
+
       setProfile(res.data.user);
-      
+
       return res.data.user;
     } catch (err) {
-      console.log(err);
+      console.log("FETCH PROFILE ERROR:", err);
+
       setProfile(null);
+
       return null;
     }
   };
@@ -44,14 +47,12 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // Firebase auth is ready
-      setLoading(false);
-
-      // Fetch profile in the background
-      fetchProfile();
-      
-
-      setLoading(false);
+      try {
+        // Wait until the user's Firestore profile is loaded
+        await fetchProfile();
+      } finally {
+        setLoading(false);
+      }
     });
 
     return unsubscribe;

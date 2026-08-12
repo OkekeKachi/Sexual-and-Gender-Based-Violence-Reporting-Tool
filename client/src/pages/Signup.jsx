@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { signupUser } from "../services/auth"; // replace with your actual import path
+import { signupUser, resendVerificationEmail } from "../services/auth"; // replace with your actual import path
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import {
@@ -17,7 +17,8 @@ import {
   FileText,
   MessageSquare,
   CheckCircle2,
-  Phone
+  Phone,
+  RefreshCw
 } from "lucide-react";
 import AppLoader from "../components/AppLoader";
 
@@ -63,10 +64,28 @@ function Signup() {
   const [mounted, setMounted] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // ── Email verification screen state ──
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
+  const [resendError, setResendError] = useState("");
+  const [resendMessage, setResendMessage] = useState("");
+
+  const RESEND_COOLDOWN_SECONDS = 60;
+
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  // Countdown ticker for the resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -99,6 +118,13 @@ function Signup() {
         confirm_password: form.confirm_password,
         phone: form.phone
       });
+      // Account creation (and the initial Firebase verification email) is
+      // handled inside signupUser. We only switch to the "verify your
+      // email" screen here — we never mark the user as verified.
+      setRegisteredEmail(form.email.trim());
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+      setResendError("");
+      setResendMessage("");
       setSuccess(true);
     } catch (err) {
       setError(
@@ -108,6 +134,27 @@ function Signup() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (resending || resendCooldown > 0) return;
+
+    setResendError("");
+    setResendMessage("");
+    setResending(true);
+    try {
+      await resendVerificationEmail(registeredEmail);
+      setResendMessage("Verification email sent again. Please check your inbox.");
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    } catch (err) {
+      setResendError(
+        err.response?.data?.message ||
+        err.message ||
+        "We couldn't resend the verification email. Please try again."
+      );
+    } finally {
+      setResending(false);
     }
   };
 
@@ -288,27 +335,88 @@ function Signup() {
                   </span>
                 </div>
 
-                {/* Success State */}
+                {/* Verify Email State */}
                 {success ? (
                   <div className="flex flex-col items-center py-6 text-center form-appear">
                     <div
                       className="mb-5 flex h-20 w-20 items-center justify-center rounded-full"
-                      style={{ background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)" }}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, rgba(42,157,143,0.15) 0%, rgba(27,58,92,0.08) 100%)",
+                      }}
                     >
-                      <CheckCircle2 size={38} className="text-emerald-600" />
+                      <Mail size={34} className="text-teal-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                      Account Created!
+
+                    <h2
+                      className="text-2xl font-bold text-slate-900"
+                      style={{ fontFamily: "'DM Serif Display', serif" }}
+                    >
+                      Verify Your Email
                     </h2>
                     <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-slate-500">
-                      Your account has been successfully created. You can now sign in to start reporting and tracking your cases.
+                      We've sent a verification link to your email address. Please
+                      check your inbox — and your spam folder — to activate your
+                      account.
                     </p>
+
+                    <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+                      <Mail size={14} className="shrink-0 text-teal-600" />
+                      <span className="truncate text-[13px] font-semibold text-slate-700">
+                        {registeredEmail}
+                      </span>
+                    </div>
+
+                    {/* Resend error banner */}
+                    {resendError && (
+                      <div
+                        className="mt-5 flex w-full items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-left text-sm font-medium text-red-700"
+                        role="alert"
+                        aria-live="assertive"
+                        style={{ animation: "fadeSlideUp 0.3s ease both" }}
+                      >
+                        <AlertCircle size={17} className="mt-0.5 shrink-0 text-red-500" />
+                        <span>{resendError}</span>
+                      </div>
+                    )}
+
+                    {/* Resend success banner */}
+                    {resendMessage && !resendError && (
+                      <div
+                        className="mt-5 flex w-full items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left text-sm font-medium text-emerald-700"
+                        role="status"
+                        aria-live="polite"
+                        style={{ animation: "fadeSlideUp 0.3s ease both" }}
+                      >
+                        <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-emerald-500" />
+                        <span>{resendMessage}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resending || resendCooldown > 0}
+                      aria-live="polite"
+                      className="btn-main mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white"
+                    >
+                      {resending ? (
+                        <span>Sending...</span>
+                      ) : resendCooldown > 0 ? (
+                        <span>Resend available in {resendCooldown}s</span>
+                      ) : (
+                        <>
+                          <RefreshCw size={16} />
+                          Resend verification email
+                        </>
+                      )}
+                    </button>
+
                     <a
                       href="/login"
-                      className="btn-main mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white no-underline"
+                      className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-slate-700 no-underline transition-colors hover:bg-slate-50"
                     >
-                      Sign in to SafeSpeak
-                      <ArrowRight size={17} />
+                      Back to Login
                     </a>
                   </div>
                 ) : (
@@ -411,36 +519,36 @@ function Signup() {
                       </div>
 
 
-                        {/* Phone Number */}
-                        <div className="form-appear input-row-appear space-y-1.5">
-                          <label
-                            htmlFor="phone"
-                            className="block text-[13px] font-semibold tracking-wide text-slate-700"
-                          >
-                            Phone Number
-                          </label>
+                      {/* Phone Number */}
+                      <div className="form-appear input-row-appear space-y-1.5">
+                        <label
+                          htmlFor="phone"
+                          className="block text-[13px] font-semibold tracking-wide text-slate-700"
+                        >
+                          Phone Number
+                        </label>
 
-                          <div className="group relative flex items-center rounded-xl border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 focus-within:border-teal-500 focus-within:ring-4 focus-within:ring-teal-100">
-                            <Phone
-                              size={17}
-                              className="absolute left-4 text-slate-400 transition-colors duration-200 group-focus-within:text-teal-600"
-                              aria-hidden="true"
-                            />
+                        <div className="group relative flex items-center rounded-xl border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 focus-within:border-teal-500 focus-within:ring-4 focus-within:ring-teal-100">
+                          <Phone
+                            size={17}
+                            className="absolute left-4 text-slate-400 transition-colors duration-200 group-focus-within:text-teal-600"
+                            aria-hidden="true"
+                          />
 
-                            <input
-                              id="phone"
-                              name="phone"
-                              type="tel"
-                              autoComplete="tel"
-                              value={form.phone}
-                              onChange={handleChange}
-                              required
-                              placeholder="+234 801 234 5678"
-                              aria-required="true"
-                              className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none"
-                            />
-                          </div>
+                          <input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            autoComplete="tel"
+                            value={form.phone}
+                            onChange={handleChange}
+                            required
+                            placeholder="+234 801 234 5678"
+                            aria-required="true"
+                            className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                          />
                         </div>
+                      </div>
 
                       {/* Password */}
                       <div className="form-appear input-row-appear space-y-1.5">
@@ -510,7 +618,7 @@ function Signup() {
                           className="btn-main relative flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white"
                         >
                           {loading ? (
-                              <span>Creating account....</span>
+                            <span>Creating account....</span>
                           ) : (
                             <>
                               Create Account
